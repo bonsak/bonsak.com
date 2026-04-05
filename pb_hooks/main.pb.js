@@ -4,7 +4,7 @@ onRecordEnrich((e) => {
   const filename = record.get("hero_image");
 
   if (filename) {
-    const appUrl = $app.settings().meta.appUrl || "http://127.0.0.1:8090";
+    const appUrl = $app.settings().meta.appURL || "http://127.0.0.1:8090";
     const collectionId = record.collection().id;
     const recordId = record.id;
     const fullUrl = `${appUrl}/api/files/${collectionId}/${recordId}/${filename}`;
