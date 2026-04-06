@@ -1,53 +1,65 @@
 // pb_hooks/main.pb.js
 
-// Helper function to build file URL
-function buildFileUrl(appUrl, collectionId, recordId, filename) {
-  return `${appUrl}/api/files/${collectionId}/${recordId}/${filename}`;
-}
+// Work collection - legger til hero_image_url og more_images_urls
+onRecordEnrich(function (e) {
+  var record = e.record;
+  var appUrl = $app.settings().meta.appURL || "http://127.0.0.1:8090";
+  var collectionId = record.collection().id;
+  var recordId = record.id;
 
-// Work collection
-onRecordEnrich((e) => {
-  const record = e.record;
-  const appUrl = $app.settings().meta.appURL || "http://127.0.0.1:8090";
-  const collectionId = record.collection().id;
-  const recordId = record.id;
+  var heroImage = record.get("hero_image");
+  var moreImages = record.get("more_images");
 
-  record.withCustomData(true);
+  if (heroImage || (moreImages && moreImages.length > 0)) {
+    record.withCustomData(true);
 
-  // Hero image URL
-  const heroImage = record.get("hero_image");
-  if (heroImage) {
-    record.set(
-      "hero_image_url",
-      buildFileUrl(appUrl, collectionId, recordId, heroImage)
-    );
-  }
+    if (heroImage) {
+      record.set(
+        "hero_image_url",
+        appUrl + "/api/files/" + collectionId + "/" + recordId + "/" + heroImage
+      );
+    }
 
-  // More images URLs
-  const moreImages = record.get("more_images");
-  if (moreImages && moreImages.length > 0) {
-    const moreImagesUrls = moreImages.map((filename) =>
-      buildFileUrl(appUrl, collectionId, recordId, filename)
-    );
-    record.set("more_images_urls", moreImagesUrls);
+    if (moreImages && moreImages.length > 0) {
+      var urls = [];
+      for (var i = 0; i < moreImages.length; i++) {
+        urls.push(
+          appUrl +
+            "/api/files/" +
+            collectionId +
+            "/" +
+            recordId +
+            "/" +
+            moreImages[i]
+        );
+      }
+      record.set("more_images_urls", urls);
+    }
   }
 
   e.next();
 }, "work");
 
-// Timeline collection
-onRecordEnrich((e) => {
-  const record = e.record;
-  const appUrl = $app.settings().meta.appURL || "http://127.0.0.1:8090";
-  const collectionId = record.collection().id;
-  const recordId = record.id;
+// Timeline collection - legger til timeline_hero_url
+onRecordEnrich(function (e) {
+  var record = e.record;
+  var timelineHero = record.get("timeline_hero");
 
-  const timelineHero = record.get("timeline_hero");
   if (timelineHero) {
+    var appUrl = $app.settings().meta.appURL || "http://127.0.0.1:8090";
+    var collectionId = record.collection().id;
+    var recordId = record.id;
+
     record.withCustomData(true);
     record.set(
       "timeline_hero_url",
-      buildFileUrl(appUrl, collectionId, recordId, timelineHero)
+      appUrl +
+        "/api/files/" +
+        collectionId +
+        "/" +
+        recordId +
+        "/" +
+        timelineHero
     );
   }
 
